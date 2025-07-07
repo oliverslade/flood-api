@@ -1,4 +1,4 @@
-# Makefile for Flood API Database Operations
+# Makefile for Flood API
 # Usage: make <target>
 
 # Database configuration
@@ -12,22 +12,16 @@ ANALYSIS_DIR = migrations/analysis
 # Default target
 .PHONY: help
 help:
-	@echo "Flood API Database Operations"
+	@echo "Flood API Operations"
 	@echo "============================="
 	@echo ""
 	@echo "Available targets:"
-	@echo "  migrate-db FROM=XXX - Run migrations after XXX (3-digit number)"
-	@echo "  benchmark-db        - Run performance benchmarks"
-	@echo "  test-db-connection  - Test database connection"
+	@echo "  migrate-db FROM=XXX       # Run migrations after XXX (3-digit number)"
+	@echo "  benchmark-db              # Run performance benchmarks"
+	@echo "  test-db-connection        # Test database connection"
+	@echo "  db-status                 # Show database status and table info"
+	@echo "  sqlc-generate             # Generate Go code from SQL queries"
 	@echo ""
-	@echo "Migration examples:"
-	@echo "  make migrate-db FROM=001  # Run migrations 002, 003, etc."
-	@echo "  make migrate-db FROM=000  # Run all migrations"
-	@echo ""
-	@echo "Workflow example:"
-	@echo "  make test-connection      # Verify DB is accessible"
-	@echo "  make migrate-db FROM=000  # Apply all migrations"
-	@echo "  make benchmark            # Test performance"
 
 # Database status and info
 .PHONY: db-status
@@ -74,3 +68,10 @@ benchmark:
 test-connection:
 	@echo "🔌 Testing database connection..."
 	@$(PSQL) -c "SELECT version();" > /dev/null && echo "Database connection successful" || echo "Database connection failed"
+
+# Code generation
+.PHONY: sqlc-generate
+sqlc-generate:
+	@echo "Generating Go code from SQL queries..."
+	@sqlc generate
+	@echo "Go code generated successfully"

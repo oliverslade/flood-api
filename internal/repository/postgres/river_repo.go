@@ -1,0 +1,90 @@
+//go:generate sqlc generate
+
+package postgres
+
+import (
+	"context"
+	"database/sql"
+	"time"
+
+	"github.com/oliverslade/flood-api/internal/domain"
+	"github.com/oliverslade/flood-api/internal/repository"
+	"github.com/oliverslade/flood-api/internal/repository/postgres/gen"
+)
+
+type RiverRepo struct {
+	queries *gen.Queries
+}
+
+func NewRiverRepo(db *sql.DB) repository.RiverRepository {
+	return &RiverRepo{
+		queries: gen.New(db),
+	}
+}
+
+// GetReadings returns slice of river level readings with pagination and optional date filtering
+func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsParams) ([]domain.RiverReading, error) {
+	// Clamp pagination parameters defensively
+	page := params.Pagination.Page
+	if page < 1 {
+		page = 1
+	}
+	
+	pageSize := params.Pagination.PageSize
+	if pageSize <= 0 {
+		pageSize = defaultPageSize
+	}
+	if pageSize > maxPageSize {
+		pageSize = maxPageSize
+	}
+
+	// Calculate how many records to skip for pagination
+	offset := (page - 1) * pageSize
+
+	if params.StartDate != nil {
+		queryParams := gen.GetRiverReadingsWithStartDateParams{
+			Timestamp: *params.StartDate,
+			Limit:     int32(pageSize),
+			Offset:    int32(offset),
+		}
+		dbReadings, err := r.queries.GetRiverReadingsWithStartDate(ctx, queryParams)
+		if err != nil {
+			return nil, err
+		}
+		
+		readings := make([]domain.RiverReading, len(dbReadings))
+		for i, dbReading := range dbReadings {
+			readings[i] = domain.RiverReading{
+				Timestamp: dbReading.Timestamp,
+				Level:     dbReading.Level,
+			}
+		}
+		return readings, nil
+	}
+
+	queryParams := gen.GetRiverReadingsParams{
+		Limit:  int32(pageSize),
+		Offset: int32(offset),
+	}
+	dbReadings, err := r.queries.GetRiverReadings(ctx, queryParams)
+	if err != nil {
+		return nil, err
+	}
+	
+	readings := make([]domain.RiverReading, len(dbReadings))
+	for i, dbReading := range dbReadings {
+		readings[i] = domain.RiverReading{
+			Timestamp: dbReading.Timestamp,
+			Level:     dbReading.Level,
+		}
+	}
+	return readings, nil
+}
+
+// GetReadingsCount returns the total count of river readings for pagination
+func (r *RiverRepo) GetReadingsCount(ctx context.Context, startDate *time.Time) (int64, error) {
+	if startDate != nil {
+		return r.queries.CountRiverReadingsWithStartDate(ctx, *startDate)
+	}
+	return r.queries.CountRiverReadings(ctx)
+}
