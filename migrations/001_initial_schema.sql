@@ -1,4 +1,5 @@
 --
+-- Migration 001: Initial schema
 -- PostgreSQL database dump
 --
 
@@ -55,4 +56,3 @@ CREATE TABLE public.stationnames (
 --
 -- PostgreSQL database dump complete
 --
-
