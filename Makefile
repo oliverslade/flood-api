@@ -28,9 +28,8 @@ help:
 	@echo "  test-coverage             # Run tests with coverage report"
 	@echo "  clean                     # Clean build artifacts"
 	@echo "  fmt                       # Format Go code using go fmt"
-	@echo "  fmt-imports               # Format Go code and organize imports using goimports"
-	@echo "  fmt-check                 # Check if Go code is properly formatted"
-	@echo "  fmt-all                   # Run all formatting tools (fmt + imports)"
+	@echo "  vet                       # Run go vet for static analysis"
+	@echo "  check                     # Run fmt, vet, build and test (full quality check)"
 	@echo ""
 
 # Database status and info
@@ -135,29 +134,18 @@ fmt:
 	@go fmt ./...
 	@echo "Go code formatted successfully"
 
-.PHONY: fmt-imports
-fmt-imports:
-	@echo "Formatting Go code and organizing imports..."
-	@if command -v goimports >/dev/null 2>&1; then \
-		goimports -w .; \
-		echo "Go code formatted and imports organized successfully"; \
-	else \
-		echo "goimports not found. Install with: go install golang.org/x/tools/cmd/goimports@latest"; \
-		echo "Falling back to go fmt..."; \
-		go fmt ./...; \
-	fi
+.PHONY: vet
+vet:
+	@echo "Running go vet for static analysis..."
+	@go vet ./...
+	@echo "Static analysis completed successfully"
 
-.PHONY: fmt-check
-fmt-check:
-	@echo "Checking Go code formatting..."
-	@unformatted=$$(go fmt ./... | wc -l); \
-	if [ $$unformatted -eq 0 ]; then \
-		echo "All Go code is properly formatted"; \
-	else \
-		echo "Some Go files need formatting. Run 'make fmt' to fix."; \
-		exit 1; \
-	fi
-
-.PHONY: fmt-all
-fmt-all: fmt fmt-imports
-	@echo "All formatting completed"
+.PHONY: check
+check: fmt vet build test
+	@echo ""
+	@echo "Quality checks passed!"
+	@echo "Code formatted"
+	@echo "Static analysis passed"
+	@echo "Build successful"
+	@echo "All tests passed"
+	@echo ""
