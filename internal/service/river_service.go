@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
@@ -14,11 +15,18 @@ type RiverService struct {
 func NewRiverService(r repository.RiverRepository) *RiverService {
 	return &RiverService{repo: r}
 }
-
-func (s *RiverService) GetReadings(ctx context.Context, page, pageSize int) ([]domain.RiverReading, error) {
-	params := domain.GetReadingsParams{
-		Pagination: domain.PaginationParams{Page: page, PageSize: pageSize},
-		StartDate:  nil,
+func (s *RiverService) GetReadings(ctx context.Context, page, pageSize int, startDate time.Time) ([]domain.RiverReading, error) {
+	if startDate.IsZero() {
+		params := domain.GetReadingsParams{
+			Pagination: domain.PaginationParams{Page: page, PageSize: pageSize},
+			StartDate:  nil,
+		}
+		return s.repo.GetReadings(ctx, params)
+	} else {
+		params := domain.GetReadingsParams{
+			Pagination: domain.PaginationParams{Page: page, PageSize: pageSize},
+			StartDate:  &startDate,
+		}
+		return s.repo.GetReadings(ctx, params)
 	}
-	return s.repo.GetReadings(ctx, params)
 }

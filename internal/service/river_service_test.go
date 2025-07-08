@@ -15,7 +15,7 @@ func TestRiverService_GetReadings(t *testing.T) {
 	service := NewRiverService(memRepo)
 
 	t.Run("basic pagination - first page", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 1, 2)
+		out, err := service.GetReadings(ctx, 1, 2, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 2)
 
@@ -26,7 +26,7 @@ func TestRiverService_GetReadings(t *testing.T) {
 	})
 
 	t.Run("pagination - second page", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 2, 2)
+		out, err := service.GetReadings(ctx, 2, 2, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 2)
 
@@ -37,7 +37,7 @@ func TestRiverService_GetReadings(t *testing.T) {
 	})
 
 	t.Run("pagination - partial last page", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 3, 2)
+		out, err := service.GetReadings(ctx, 3, 2, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 1)
 
@@ -46,13 +46,13 @@ func TestRiverService_GetReadings(t *testing.T) {
 	})
 
 	t.Run("pagination - page beyond data", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 10, 2)
+		out, err := service.GetReadings(ctx, 10, 2, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 0)
 	})
 
 	t.Run("larger page size", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 1, 10)
+		out, err := service.GetReadings(ctx, 1, 10, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 5)
 
@@ -63,12 +63,24 @@ func TestRiverService_GetReadings(t *testing.T) {
 	})
 
 	t.Run("invalid pagination parameters", func(t *testing.T) {
-		out, err := service.GetReadings(ctx, 0, 2)
+		out, err := service.GetReadings(ctx, 0, 2, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 2)
 
-		out, err = service.GetReadings(ctx, 1, 0)
+		out, err = service.GetReadings(ctx, 1, 0, time.Time{})
 		require.NoError(t, err)
 		require.Len(t, out, 5)
+	})
+
+	t.Run("basic pagination with start date", func(t *testing.T) {
+		startDate := time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC)
+		out, err := service.GetReadings(ctx, 1, 2, startDate)
+		require.NoError(t, err)
+		require.Len(t, out, 2)
+
+		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[0].Timestamp)
+		require.Equal(t, 1.3, out[0].Level)
+		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, 1.4, out[1].Level)
 	})
 }
