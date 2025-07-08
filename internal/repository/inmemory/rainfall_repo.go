@@ -26,17 +26,17 @@ func NewRainfallRepo() repository.RainfallRepository {
 
 	// Mirror actual database station mapping (ID -> Name)
 	stations := map[string]domain.Station{
-		"catcleugh":              	 {ID: "010660", Name: "catcleugh"},
-		"haltwhistle":            	 {ID: "014555", Name: "haltwhistle"},
-		"hexham-firtrees":        	 {ID: "016140", Name: "hexham-firtrees"},
-		"kielder-ridge-end":      	 {ID: "008850", Name: "kielder-ridge-end"},
+		"catcleugh":                 {ID: "010660", Name: "catcleugh"},
+		"haltwhistle":               {ID: "014555", Name: "haltwhistle"},
+		"hexham-firtrees":           {ID: "016140", Name: "hexham-firtrees"},
+		"kielder-ridge-end":         {ID: "008850", Name: "kielder-ridge-end"},
 		"chirdon":                   {ID: "010312", Name: "chirdon"},
 		"garrigill-noonstones-hill": {ID: "013045", Name: "garrigill-noonstones-hill"},
-		"hartside":               	 {ID: "013336", Name: "hartside"},
-		"alston":                 	 {ID: "013553", Name: "alston"},
-		"knarsdale":              	 {ID: "013878", Name: "knarsdale"},
-		"acomb-codlaw-hill":      	 {ID: "015313", Name: "acomb-codlaw-hill"},
-		"allenheads-allen-lodge": 	 {ID: "015347", Name: "allenheads-allen-lodge"},
+		"hartside":                  {ID: "013336", Name: "hartside"},
+		"alston":                    {ID: "013553", Name: "alston"},
+		"knarsdale":                 {ID: "013878", Name: "knarsdale"},
+		"acomb-codlaw-hill":         {ID: "015313", Name: "acomb-codlaw-hill"},
+		"allenheads-allen-lodge":    {ID: "015347", Name: "allenheads-allen-lodge"},
 	}
 
 	return &RainfallRepo{readings: readings, stations: stations}
@@ -52,7 +52,7 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 	if page < 1 {
 		page = 1
 	}
-	
+
 	pageSize := params.Pagination.PageSize
 	if pageSize <= 0 {
 		pageSize = defaultPageSize

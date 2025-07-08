@@ -32,7 +32,7 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 	if page < 1 {
 		page = 1
 	}
-	
+
 	pageSize := params.Pagination.PageSize
 	if pageSize <= 0 {
 		pageSize = defaultPageSize
@@ -55,7 +55,7 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 		if err != nil {
 			return nil, err
 		}
-		
+
 		readings := make([]domain.RainfallReading, len(dbReadings))
 		for i, dbReading := range dbReadings {
 			readings[i] = r.toDomainRainfallReading(dbReading.Timestamp, dbReading.Level, params.StationName)
@@ -72,7 +72,7 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 	if err != nil {
 		return nil, err
 	}
-	
+
 	readings := make([]domain.RainfallReading, len(dbReadings))
 	for i, dbReading := range dbReadings {
 		readings[i] = r.toDomainRainfallReading(dbReading.Timestamp, dbReading.Level, params.StationName)
@@ -94,7 +94,7 @@ func (r *RainfallRepo) GetReadingsCountByStation(ctx context.Context, stationNam
 		}
 		return r.queries.CountRainfallReadingsByStationWithStartDate(ctx, params)
 	}
-	
+
 	return r.queries.CountRainfallReadingsByStation(ctx, station.ID)
 }
 
@@ -127,5 +127,3 @@ func (r *RainfallRepo) toDomainRainfallReading(timestamp time.Time, level float6
 		StationName: stationName,
 	}
 }
-
-

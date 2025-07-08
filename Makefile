@@ -21,6 +21,16 @@ help:
 	@echo "  test-db-connection        # Test database connection"
 	@echo "  db-status                 # Show database status and table info"
 	@echo "  sqlc-generate             # Generate Go code from SQL queries"
+	@echo "  build                     # Build the application"
+	@echo "  build-release             # Build optimized release binary"
+	@echo "  test                      # Run all tests"
+	@echo "  test-verbose              # Run tests with verbose output"
+	@echo "  test-coverage             # Run tests with coverage report"
+	@echo "  clean                     # Clean build artifacts"
+	@echo "  fmt                       # Format Go code using go fmt"
+	@echo "  fmt-imports               # Format Go code and organize imports using goimports"
+	@echo "  fmt-check                 # Check if Go code is properly formatted"
+	@echo "  fmt-all                   # Run all formatting tools (fmt + imports)"
 	@echo ""
 
 # Database status and info
@@ -66,7 +76,7 @@ benchmark:
 
 .PHONY: test-db-connection
 test-connection:
-	@echo "🔌 Testing database connection..."
+	@echo "Testing database connection..."
 	@$(PSQL) -c "SELECT version();" > /dev/null && echo "Database connection successful" || echo "Database connection failed"
 
 # Code generation
@@ -75,3 +85,79 @@ sqlc-generate:
 	@echo "Generating Go code from SQL queries..."
 	@sqlc generate
 	@echo "Go code generated successfully"
+
+# Build targets
+.PHONY: build
+build:
+	@echo "Building flood-api..."
+	@go build -o bin/flood-api ./cmd/flood-api
+	@echo "Build completed successfully - binary: bin/flood-api"
+
+.PHONY: build-release
+build-release:
+	@echo "Building optimized release binary..."
+	@CGO_ENABLED=0 go build -ldflags="-w -s" -o bin/flood-api ./cmd/flood-api
+	@echo "Release build completed - binary: bin/flood-api"
+
+.PHONY: clean
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf bin/
+	@go clean
+	@echo "Cleanup completed"
+
+# Test targets
+.PHONY: test
+test:
+	@echo "Running tests..."
+	@go test ./...
+	@echo "All tests passed"
+
+.PHONY: test-verbose
+test-verbose:
+	@echo "Running tests with verbose output..."
+	@go test -v ./...
+
+.PHONY: test-coverage
+test-coverage:
+	@echo "Running tests with coverage..."
+	@go test -cover ./...
+	@echo ""
+	@echo "Generating detailed coverage report..."
+	@go test -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+# Go formatting and code quality
+.PHONY: fmt
+fmt:
+	@echo "Formatting Go code..."
+	@go fmt ./...
+	@echo "Go code formatted successfully"
+
+.PHONY: fmt-imports
+fmt-imports:
+	@echo "Formatting Go code and organizing imports..."
+	@if command -v goimports >/dev/null 2>&1; then \
+		goimports -w .; \
+		echo "Go code formatted and imports organized successfully"; \
+	else \
+		echo "goimports not found. Install with: go install golang.org/x/tools/cmd/goimports@latest"; \
+		echo "Falling back to go fmt..."; \
+		go fmt ./...; \
+	fi
+
+.PHONY: fmt-check
+fmt-check:
+	@echo "Checking Go code formatting..."
+	@unformatted=$$(go fmt ./... | wc -l); \
+	if [ $$unformatted -eq 0 ]; then \
+		echo "All Go code is properly formatted"; \
+	else \
+		echo "Some Go files need formatting. Run 'make fmt' to fix."; \
+		exit 1; \
+	fi
+
+.PHONY: fmt-all
+fmt-all: fmt fmt-imports
+	@echo "All formatting completed"

@@ -29,7 +29,7 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 	if page < 1 {
 		page = 1
 	}
-	
+
 	pageSize := params.Pagination.PageSize
 	if pageSize <= 0 {
 		pageSize = defaultPageSize
@@ -51,7 +51,7 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 		if err != nil {
 			return nil, err
 		}
-		
+
 		readings := make([]domain.RiverReading, len(dbReadings))
 		for i, dbReading := range dbReadings {
 			readings[i] = domain.RiverReading{
@@ -70,7 +70,7 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 	if err != nil {
 		return nil, err
 	}
-	
+
 	readings := make([]domain.RiverReading, len(dbReadings))
 	for i, dbReading := range dbReadings {
 		readings[i] = domain.RiverReading{
