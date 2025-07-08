@@ -1,15 +1,15 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    schema: "migrations"                       # keep if numbered
+    schema: "migrations"
     queries: "internal/repository/postgres/*.sql"
     gen:
       go:
         package: "gen"
         out: "internal/repository/postgres/gen"
         sql_package: "database/sql"
-        emit_prepared_queries: true            # ← optional perf bump
-        emit_interface: false                  # ← simpler if unused
+        emit_prepared_queries: true
+        emit_interface: false
         emit_json_tags: false
         emit_db_tags: true
         emit_empty_slices: true
