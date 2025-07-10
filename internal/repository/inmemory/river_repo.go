@@ -4,13 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
-)
-
-const (
-	defaultPageSize = 20
-	maxPageSize     = 1000
 )
 
 // This is an in-memory implementation fake for use with the service layer unit tests
@@ -39,10 +35,10 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 
 	pageSize := params.Pagination.PageSize
 	if pageSize <= 0 {
-		pageSize = defaultPageSize
+		pageSize = constants.DefaultPageSize
 	}
-	if pageSize > maxPageSize {
-		pageSize = maxPageSize
+	if pageSize > constants.MaxPageSize {
+		pageSize = constants.MaxPageSize
 	}
 
 	var filtered []domain.RiverReading

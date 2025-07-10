@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
 )
@@ -55,10 +56,10 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 
 	pageSize := params.Pagination.PageSize
 	if pageSize <= 0 {
-		pageSize = defaultPageSize
+		pageSize = constants.DefaultPageSize
 	}
-	if pageSize > maxPageSize {
-		pageSize = maxPageSize
+	if pageSize > constants.MaxPageSize {
+		pageSize = constants.MaxPageSize
 	}
 
 	var filtered []domain.RainfallReading

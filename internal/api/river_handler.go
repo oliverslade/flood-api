@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/service"
 )
 
@@ -42,7 +43,7 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	var pageSize int
 	pageSizeParam := q.Get("pagesize")
 	if pageSizeParam == "" {
-		pageSize = 0
+		pageSize = constants.DefaultPageSize
 	} else {
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
