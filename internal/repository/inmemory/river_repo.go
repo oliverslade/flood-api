@@ -65,17 +65,3 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 
 	return filtered[offset:end], nil
 }
-
-func (r *RiverRepo) GetReadingsCount(ctx context.Context, startDate *time.Time) (int64, error) {
-	if startDate == nil {
-		return int64(len(r.readings)), nil
-	}
-
-	count := 0
-	for _, reading := range r.readings {
-		if reading.Timestamp.After(*startDate) || reading.Timestamp.Equal(*startDate) {
-			count++
-		}
-	}
-	return int64(count), nil
-}

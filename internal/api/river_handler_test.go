@@ -25,10 +25,6 @@ func (m *mockErrorRepo) GetReadings(ctx context.Context, params domain.GetReadin
 	return nil, fmt.Errorf("repository error")
 }
 
-func (m *mockErrorRepo) GetReadingsCount(ctx context.Context, startDate *time.Time) (int64, error) {
-	return 0, fmt.Errorf("repository error")
-}
-
 func TestRiverHandler_GetReadings(t *testing.T) {
 	t.Run("successful request with default parameters", func(t *testing.T) {
 		// Setup

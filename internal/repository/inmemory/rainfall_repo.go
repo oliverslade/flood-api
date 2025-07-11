@@ -91,26 +91,3 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 
 	return filtered[offset:end], nil
 }
-
-func (r *RainfallRepo) GetReadingsCountByStation(ctx context.Context, stationName string, startDate *time.Time) (int64, error) {
-	if _, exists := r.stations[stationName]; !exists {
-		return 0, domain.ErrNotFound
-	}
-
-	count := 0
-	for _, reading := range r.readings {
-		if reading.StationName == stationName {
-			if startDate == nil || reading.Timestamp.After(*startDate) || reading.Timestamp.Equal(*startDate) {
-				count++
-			}
-		}
-	}
-	return int64(count), nil
-}
-
-func (r *RainfallRepo) GetStationByName(ctx context.Context, stationName string) (*domain.Station, error) {
-	if station, exists := r.stations[stationName]; exists {
-		return &station, nil
-	}
-	return nil, domain.ErrNotFound
-}

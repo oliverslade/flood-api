@@ -81,29 +81,6 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 	return readings, nil
 }
 
-// GetReadingsCountByStation returns the total count of rainfall readings for a station
-func (r *RainfallRepo) GetReadingsCountByStation(ctx context.Context, stationName string, startDate *time.Time) (int64, error) {
-	station, err := r.getStationByName(ctx, stationName)
-	if err != nil {
-		return 0, err
-	}
-
-	if startDate != nil {
-		params := gen.CountRainfallReadingsByStationWithStartDateParams{
-			Stationid: station.ID,
-			Timestamp: *startDate,
-		}
-		return r.queries.CountRainfallReadingsByStationWithStartDate(ctx, params)
-	}
-
-	return r.queries.CountRainfallReadingsByStation(ctx, station.ID)
-}
-
-// GetStationByName returns station information by name (public interface method)
-func (r *RainfallRepo) GetStationByName(ctx context.Context, stationName string) (*domain.Station, error) {
-	return r.getStationByName(ctx, stationName)
-}
-
 // getStationByName returns station information by name (internal helper for validation)
 func (r *RainfallRepo) getStationByName(ctx context.Context, stationName string) (*domain.Station, error) {
 	dbStation, err := r.queries.GetStationByName(ctx, stationName)

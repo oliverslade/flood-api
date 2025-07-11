@@ -5,7 +5,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
@@ -80,12 +79,4 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 		}
 	}
 	return readings, nil
-}
-
-// GetReadingsCount returns the total count of river readings for pagination
-func (r *RiverRepo) GetReadingsCount(ctx context.Context, startDate *time.Time) (int64, error) {
-	if startDate != nil {
-		return r.queries.CountRiverReadingsWithStartDate(ctx, *startDate)
-	}
-	return r.queries.CountRiverReadings(ctx)
 }
