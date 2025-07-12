@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
 	"github.com/oliverslade/flood-api/internal/repository/postgres/gen"
@@ -28,28 +27,14 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 		return nil, err
 	}
 
-	// Clamp pagination parameters defensively
-	page := params.Pagination.Page
-	if page < 1 {
-		page = 1
-	}
-
-	pageSize := params.Pagination.PageSize
-	if pageSize <= 0 {
-		pageSize = constants.DefaultPageSize
-	}
-	if pageSize > constants.MaxPageSize {
-		pageSize = constants.MaxPageSize
-	}
-
 	// Calculate offset for pagination
-	offset := (page - 1) * pageSize
+	offset := (params.Pagination.Page - 1) * params.Pagination.PageSize
 
 	if params.StartDate != nil {
 		queryParams := gen.GetRainfallReadingsByStationWithStartDateParams{
 			Stationid: station.ID,
 			Timestamp: *params.StartDate,
-			Limit:     int32(pageSize),
+			Limit:     int32(params.Pagination.PageSize),
 			Offset:    int32(offset),
 		}
 		dbReadings, err := r.queries.GetRainfallReadingsByStationWithStartDate(ctx, queryParams)
@@ -66,7 +51,7 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 
 	queryParams := gen.GetRainfallReadingsByStationParams{
 		Stationid: station.ID,
-		Limit:     int32(pageSize),
+		Limit:     int32(params.Pagination.PageSize),
 		Offset:    int32(offset),
 	}
 	dbReadings, err := r.queries.GetRainfallReadingsByStation(ctx, queryParams)

@@ -6,7 +6,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
 	"github.com/oliverslade/flood-api/internal/repository/postgres/gen"
@@ -24,27 +23,13 @@ func NewRiverRepo(db *sql.DB) repository.RiverRepository {
 
 // GetReadings returns slice of river level readings with pagination and optional date filtering
 func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsParams) ([]domain.RiverReading, error) {
-	// Clamp pagination parameters defensively
-	page := params.Pagination.Page
-	if page < 1 {
-		page = 1
-	}
-
-	pageSize := params.Pagination.PageSize
-	if pageSize <= 0 {
-		pageSize = constants.DefaultPageSize
-	}
-	if pageSize > constants.MaxPageSize {
-		pageSize = constants.MaxPageSize
-	}
-
 	// Calculate how many records to skip for pagination
-	offset := (page - 1) * pageSize
+	offset := (params.Pagination.Page - 1) * params.Pagination.PageSize
 
 	if params.StartDate != nil {
 		queryParams := gen.GetRiverReadingsWithStartDateParams{
 			Timestamp: *params.StartDate,
-			Limit:     int32(pageSize),
+			Limit:     int32(params.Pagination.PageSize),
 			Offset:    int32(offset),
 		}
 		dbReadings, err := r.queries.GetRiverReadingsWithStartDate(ctx, queryParams)
@@ -63,7 +48,7 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 	}
 
 	queryParams := gen.GetRiverReadingsParams{
-		Limit:  int32(pageSize),
+		Limit:  int32(params.Pagination.PageSize),
 		Offset: int32(offset),
 	}
 	dbReadings, err := r.queries.GetRiverReadings(ctx, queryParams)

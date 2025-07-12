@@ -47,7 +47,7 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
-		if err != nil || pageSize <= 0 {
+		if err != nil || pageSize < 0 {
 			slog.Warn("Invalid pageSize parameter", "error", err)
 			http.Error(w, "Page size must be an integer", http.StatusBadRequest)
 			return
@@ -73,13 +73,6 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("Error fetching readings", "error", err)
 		http.Error(w, "Internal server error when getting readings", http.StatusInternalServerError)
-		return
-	}
-
-	if len(readings) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "No river readings found"})
 		return
 	}
 

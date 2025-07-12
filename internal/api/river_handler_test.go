@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Add this after the imports and before the test functions
 type mockErrorRepo struct{}
 
 func (m *mockErrorRepo) GetReadings(ctx context.Context, params domain.GetReadingsParams) ([]domain.RiverReading, error) {
@@ -26,7 +25,7 @@ func (m *mockErrorRepo) GetReadings(ctx context.Context, params domain.GetReadin
 }
 
 func TestRiverHandler_GetReadings(t *testing.T) {
-	t.Run("successful request with default parameters", func(t *testing.T) {
+	t.Run("returns readings successfully with default parameters", func(t *testing.T) {
 		// Setup
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
@@ -60,7 +59,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, 1.2, readings[0].Level)
 	})
 
-	t.Run("request with both pagination parameters", func(t *testing.T) {
+	t.Run("returns readings successfully with both pagination parameters", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -88,7 +87,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, 1.2, readings[0].Level)
 	})
 
-	t.Run("request with start date filter", func(t *testing.T) {
+	t.Run("returns readings successfully with start date filter", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -116,7 +115,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, 1.1, readings[0].Level)
 	})
 
-	t.Run("invalid start date format returns 400", func(t *testing.T) {
+	t.Run("returns bad request when start date parameter is invalid", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -133,7 +132,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Contains(t, rr.Body.String(), "Start date must be in format YYYY-MM-DD")
 	})
 
-	t.Run("invalid page parameter returns 400", func(t *testing.T) {
+	t.Run("returns bad request when page parameter is invalid", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -150,7 +149,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Contains(t, rr.Body.String(), "Page must be an integer")
 	})
 
-	t.Run("invalid pagesize parameter returns 400", func(t *testing.T) {
+	t.Run("returns bad request when page size parameter is invalid", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -167,7 +166,7 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Contains(t, rr.Body.String(), "Page size must be an integer")
 	})
 
-	t.Run("request with date filter that returns no results", func(t *testing.T) {
+	t.Run("returns no readings when start date is in the future", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -180,11 +179,18 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 
 		handler.GetReadings(rr, req)
 
-		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Contains(t, rr.Body.String(), "No river readings found")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+
+		var response map[string][]domain.RiverReading
+		err = json.Unmarshal(rr.Body.Bytes(), &response)
+		require.NoError(t, err)
+
+		readings := response["readings"]
+		assert.Len(t, readings, 0)
 	})
 
-	t.Run("return 500 error when something goes wrong", func(t *testing.T) {
+	t.Run("returns internal server error when repository returns an error", func(t *testing.T) {
 		repo := &mockErrorRepo{}
 		service := service.NewRiverService(repo)
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))

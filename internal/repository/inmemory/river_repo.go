@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
 )
@@ -27,20 +26,6 @@ func NewRiverRepo() repository.RiverRepository {
 }
 
 func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsParams) ([]domain.RiverReading, error) {
-	// Clamp pagination parameters defensively
-	page := params.Pagination.Page
-	if page < 1 {
-		page = 1
-	}
-
-	pageSize := params.Pagination.PageSize
-	if pageSize <= 0 {
-		pageSize = constants.DefaultPageSize
-	}
-	if pageSize > constants.MaxPageSize {
-		pageSize = constants.MaxPageSize
-	}
-
 	var filtered []domain.RiverReading
 
 	if params.StartDate != nil {
@@ -53,8 +38,8 @@ func (r *RiverRepo) GetReadings(ctx context.Context, params domain.GetReadingsPa
 		filtered = r.readings
 	}
 
-	offset := (page - 1) * pageSize
-	end := offset + pageSize
+	offset := (params.Pagination.Page - 1) * params.Pagination.PageSize
+	end := offset + params.Pagination.PageSize
 
 	if offset >= len(filtered) {
 		return []domain.RiverReading{}, nil

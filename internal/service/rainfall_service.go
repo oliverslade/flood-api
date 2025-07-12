@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/oliverslade/flood-api/internal/constants"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
 )
@@ -17,8 +18,20 @@ func NewRainfallService(r repository.RainfallRepository) *RainfallService {
 }
 
 func (s *RainfallService) GetReadingsByStation(ctx context.Context, stationName string, page int, pageSize int, start time.Time) ([]domain.RainfallReading, error) {
+	// Clamp pagination parameters - this is business logic, not data access logic
+	if page < 1 {
+		page = 1
+	}
+
+	if pageSize <= 0 {
+		pageSize = constants.DefaultPageSize
+	}
+	if pageSize > constants.MaxPageSize {
+		pageSize = constants.MaxPageSize
+	}
+
 	pagination := domain.PaginationParams{
-		Page: page,
+		Page:     page,
 		PageSize: pageSize,
 	}
 
@@ -26,18 +39,18 @@ func (s *RainfallService) GetReadingsByStation(ctx context.Context, stationName 
 	if start.IsZero() {
 		readingParams = domain.GetReadingsParams{
 			Pagination: pagination,
-			StartDate: nil,
+			StartDate:  nil,
 		}
 	} else {
 		readingParams = domain.GetReadingsParams{
 			Pagination: pagination,
-			StartDate: &start,
+			StartDate:  &start,
 		}
 	}
 
 	params := domain.GetRainfallParams{
 		GetReadingsParams: readingParams,
-		StationName: stationName,
+		StationName:       stationName,
 	}
 
 	return s.repo.GetReadingsByStation(ctx, params)

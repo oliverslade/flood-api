@@ -9,6 +9,9 @@ PSQL = psql -d $(DB_NAME)
 MIGRATIONS_DIR = migrations
 ANALYSIS_DIR = migrations/analysis
 
+# Docker configuration for integration tests
+DOCKER_HOST_VAR = unix://$(HOME)/.colima/default/docker.sock
+
 # Default target
 .PHONY: help
 help:
@@ -23,13 +26,16 @@ help:
 	@echo "  sqlc-generate             # Generate Go code from SQL queries"
 	@echo "  build                     # Build the application"
 	@echo "  build-release             # Build optimized release binary"
-	@echo "  test                      # Run all tests"
-	@echo "  test-verbose              # Run tests with verbose output"
-	@echo "  test-coverage             # Run tests with coverage report"
+	@echo "  test                      # Run unit tests"
+	@echo "  test-verbose              # Run unit tests with verbose output"
+	@echo "  test-coverage             # Run unit tests with coverage report"
+	@echo "  test-integration          # Run integration tests (requires Docker)"
+	@echo "  test-integration-verbose  # Run integration tests with verbose output"
+	@echo "  test-all                  # Run both unit and integration tests"
 	@echo "  clean                     # Clean build artifacts"
 	@echo "  fmt                       # Format Go code using go fmt"
 	@echo "  vet                       # Run go vet for static analysis"
-	@echo "  check                     # Run fmt, vet, build and test (full quality check)"
+	@echo "  check                     # Run fmt, vet, build and run all tests (full quality check)"
 	@echo ""
 
 # Database status and info
@@ -108,24 +114,61 @@ clean:
 # Test targets
 .PHONY: test
 test:
-	@echo "Running tests..."
+	@echo "Running unit tests..."
 	@go test ./...
-	@echo "All tests passed"
+	@echo "All unit tests passed"
 
 .PHONY: test-verbose
 test-verbose:
-	@echo "Running tests with verbose output..."
+	@echo "Running unit tests with verbose output..."
 	@go test -v ./...
 
 .PHONY: test-coverage
 test-coverage:
-	@echo "Running tests with coverage..."
+	@echo "Running unit tests with coverage..."
 	@go test -cover ./...
 	@echo ""
 	@echo "Generating detailed coverage report..."
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
+
+# Integration test targets
+.PHONY: test-integration
+test-integration:
+	@echo "Running integration tests..."
+	@echo "Checking Docker availability..."
+	@if ! docker version > /dev/null 2>&1; then \
+		echo "Docker is not running or not available"; \
+		echo "Please start Docker/Colima and try again"; \
+		echo "For Colima users: colima start"; \
+		exit 1; \
+	fi
+	@echo "Docker is available"
+	@echo "Running integration tests with testcontainers..."
+	@TESTCONTAINERS_RYUK_DISABLED=true DOCKER_HOST=$(DOCKER_HOST_VAR) go test -tags=integration ./...
+	@echo "All integration tests passed"
+
+.PHONY: test-integration-verbose
+test-integration-verbose:
+	@echo "Running integration tests with verbose output..."
+	@echo "Checking Docker availability..."
+	@if ! docker version > /dev/null 2>&1; then \
+		echo "Docker is not running or not available"; \
+		echo "Please start Docker/Colima and try again"; \
+		echo "For Colima users: colima start"; \
+		exit 1; \
+	fi
+	@echo "Docker is available"
+	@echo "Running integration tests with testcontainers..."
+	@TESTCONTAINERS_RYUK_DISABLED=true DOCKER_HOST=$(DOCKER_HOST_VAR) go test -tags=integration -v ./...
+
+.PHONY: test-all
+test-all:
+	@echo "Running all tests (unit + integration)..."
+	@$(MAKE) test
+	@$(MAKE) test-integration
+	@echo "All tests (unit + integration) passed"
 
 # Go formatting and code quality
 .PHONY: fmt
@@ -141,7 +184,7 @@ vet:
 	@echo "Static analysis completed successfully"
 
 .PHONY: check
-check: fmt vet build test
+check: fmt vet build test-all
 	@echo ""
 	@echo "Quality checks passed!"
 	@echo "Code formatted"

@@ -1,6 +1,6 @@
 package constants
 
 const (
-	DefaultPageSize = 20
+	DefaultPageSize = 12
 	MaxPageSize     = 1000
 )
