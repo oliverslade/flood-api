@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository/inmemory"
 	"github.com/oliverslade/flood-api/internal/service"
@@ -32,6 +33,9 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		// Create test request
 		req, err := http.NewRequest("GET", "/river", nil)
 		require.NoError(t, err)
@@ -39,8 +43,8 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		// Create response recorder
 		rr := httptest.NewRecorder()
 
-		// Execute the handler
-		handler.GetReadings(rr, req)
+		// Execute through router
+		router.ServeHTTP(rr, req)
 
 		// Assertions
 		assert.Equal(t, http.StatusOK, rr.Code)
@@ -65,12 +69,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?page=1&pagesize=20", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
@@ -93,12 +100,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?start=2024-01-02", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
@@ -121,12 +131,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?start=invalid", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Contains(t, rr.Body.String(), "Start date must be in format YYYY-MM-DD")
@@ -138,12 +151,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?page=invalid", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Contains(t, rr.Body.String(), "Page must be an integer")
@@ -155,12 +171,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?pagesize=invalid", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Contains(t, rr.Body.String(), "Page size must be an integer")
@@ -172,12 +191,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river?start=2025-01-01", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
@@ -196,12 +218,15 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 		handler := NewRiverHandler(service, logger)
 
+		router := chi.NewRouter()
+		router.Get("/river", handler.GetReadings)
+
 		req, err := http.NewRequest("GET", "/river", nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		handler.GetReadings(rr, req)
+		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		assert.Contains(t, rr.Body.String(), "Internal server error when getting readings")

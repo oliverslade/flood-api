@@ -18,8 +18,8 @@ func NewRainfallRepo() repository.RainfallRepository {
 	// mirrors actual database structure
 	readings := []domain.RainfallReading{
 		{Timestamp: time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), Level: 2.1, StationName: "catcleugh"},
-		{Timestamp: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), Level: 2.2, StationName: "catcleugh"},
-		{Timestamp: time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), Level: 2.3, StationName: "catcleugh"},
+		{Timestamp: time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), Level: 2.2, StationName: "catcleugh"},
+		{Timestamp: time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), Level: 2.3, StationName: "catcleugh"},
 		{Timestamp: time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), Level: 1.5, StationName: "haltwhistle"},
 		{Timestamp: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), Level: 1.6, StationName: "haltwhistle"},
 	}

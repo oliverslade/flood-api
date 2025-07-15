@@ -46,8 +46,13 @@ func main() {
 	riverService := service.NewRiverService(riverRepo)
 	riverHandler := api.NewRiverHandler(riverService, slog.Default())
 
+	rainfallRepo := postgres.NewRainfallRepo(db)
+	rainfallService := service.NewRainfallService(rainfallRepo)
+	rainfallHandler := api.NewRainfallHandler(rainfallService, slog.Default())
+
 	router := chi.NewRouter()
 	router.Get("/river", riverHandler.GetReadings)
+	router.Get("/rainfall/{station}", rainfallHandler.GetReadingsByStation)
 
 	slog.Info("Listening", "addr", addr)
 	server := &http.Server{Addr: addr, Handler: router}

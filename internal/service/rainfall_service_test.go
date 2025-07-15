@@ -21,9 +21,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 	t.Run("returns first two readings for a station when page size is 2", func(t *testing.T) {
@@ -33,7 +33,7 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
 	})
 
@@ -42,7 +42,7 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, out, 1)
 
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[0].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.3, out[0].Level)
 	})
 
@@ -59,9 +59,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 
@@ -72,9 +72,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 
@@ -83,9 +83,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, out, 2)
 
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[0].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.2, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.3, out[1].Level)
 	})
 
@@ -96,9 +96,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 
@@ -109,9 +109,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 
@@ -122,9 +122,9 @@ func TestRainfallService_GetReadingsByStation(t *testing.T) {
 
 		require.Equal(t, time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), out[0].Timestamp)
 		require.Equal(t, 2.1, out[0].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 2, 10, 0, 0, 0, time.UTC), out[1].Timestamp)
 		require.Equal(t, 2.2, out[1].Level)
-		require.Equal(t, time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
+		require.Equal(t, time.Date(2024, 1, 3, 11, 0, 0, 0, time.UTC), out[2].Timestamp)
 		require.Equal(t, 2.3, out[2].Level)
 	})
 }
