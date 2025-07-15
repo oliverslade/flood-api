@@ -29,13 +29,13 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	var page int
 	pageParam := q.Get("page")
 	if pageParam == "" {
-		page = 0
+		page = 1
 	} else {
 		var err error
 		page, err = strconv.Atoi(pageParam)
-		if err != nil || page < 0 {
+		if err != nil || page <= 0 {
 			slog.Warn("Invalid page parameter", "error", err)
-			http.Error(w, "Page must be an integer", http.StatusBadRequest)
+			http.Error(w, "Page must be a positive integer", http.StatusBadRequest)
 			return
 		}
 	}
@@ -47,9 +47,9 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
-		if err != nil || pageSize < 0 {
+		if err != nil || pageSize <= 0 {
 			slog.Warn("Invalid pageSize parameter", "error", err)
-			http.Error(w, "Page size must be an integer", http.StatusBadRequest)
+			http.Error(w, "Page size must be a positive integer", http.StatusBadRequest)
 			return
 		}
 	}

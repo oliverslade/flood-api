@@ -32,13 +32,13 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 	var page int
 	pageParam := q.Get("page")
 	if pageParam == "" {
-		page = 0
+		page = 1
 	} else {
 		var err error
 		page, err = strconv.Atoi(pageParam)
-		if err != nil || page < 0 {
+		if err != nil || page <= 0 {
 			slog.Warn("Invalid page parameter", "error", err)
-			http.Error(w, "Page must be an integer", http.StatusBadRequest)
+			http.Error(w, "Page must be a positive integer", http.StatusBadRequest)
 			return
 		}
 	}
@@ -50,9 +50,9 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 	} else {
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
-		if err != nil || pageSize < 0 {
+		if err != nil || pageSize <= 0 {
 			slog.Warn("Invalid pageSize parameter", "error", err)
-			http.Error(w, "Page size must be an integer", http.StatusBadRequest)
+			http.Error(w, "Page size must be a positive integer", http.StatusBadRequest)
 			return
 		}
 	}
@@ -72,9 +72,9 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	readings, err := h.service.GetReadingsByStation(r.Context(), name, page, pageSize, startDate)
+	readings, err := h.service.ListByStation(r.Context(), name, page, pageSize, startDate)
 	if err != nil {
-		h.logger.Error("Error fetching readings", "error", err)
+		slog.Error("Error fetching readings", "error", err)
 		http.Error(w, "Internal server error when getting readings", http.StatusInternalServerError)
 		return
 	}

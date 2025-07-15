@@ -18,14 +18,6 @@ func NewRiverService(r repository.RiverRepository) *RiverService {
 }
 
 func (s *RiverService) GetReadings(ctx context.Context, page, pageSize int, startDate time.Time) ([]domain.RiverReading, error) {
-	// Clamp pagination parameters - this is business logic, not data access logic
-	if page < 1 {
-		page = 1
-	}
-
-	if pageSize <= 0 {
-		pageSize = constants.DefaultPageSize
-	}
 	if pageSize > constants.MaxPageSize {
 		pageSize = constants.MaxPageSize
 	}

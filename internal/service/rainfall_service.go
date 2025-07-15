@@ -17,15 +17,7 @@ func NewRainfallService(r repository.RainfallRepository) *RainfallService {
 	return &RainfallService{repo: r}
 }
 
-func (s *RainfallService) GetReadingsByStation(ctx context.Context, stationName string, page int, pageSize int, start time.Time) ([]domain.RainfallReading, error) {
-	// Clamp pagination parameters - this is business logic, not data access logic
-	if page < 1 {
-		page = 1
-	}
-
-	if pageSize <= 0 {
-		pageSize = constants.DefaultPageSize
-	}
+func (s *RainfallService) ListByStation(ctx context.Context, stationName string, page int, pageSize int, start time.Time) ([]domain.RainfallReading, error) {
 	if pageSize > constants.MaxPageSize {
 		pageSize = constants.MaxPageSize
 	}

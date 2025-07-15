@@ -40,7 +40,7 @@ var migrationFiles embed.FS
 func TestGetRiverReadings(t *testing.T) {
 	t.Parallel()
 
-	//Spin testcontainer
+	//Spin up testcontainer
 	db := startTestPostgres(t)
 
 	seedTestData(t, db)
@@ -68,7 +68,6 @@ func TestGetRiverReadings(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// Parse and validate the JSON response
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	t.Logf("Response body: %s", string(body))
@@ -79,13 +78,10 @@ func TestGetRiverReadings(t *testing.T) {
 	err = json.Unmarshal(body, &result)
 	require.NoError(t, err)
 
-	// Assert exactly 2 readings (pagesize=2)
 	require.Len(t, result.Readings, 2)
 
-	// Assert timestamps are ascending as expected (oldest first)
 	require.True(t, result.Readings[0].Timestamp.Before(result.Readings[1].Timestamp))
 
-	// Assert we got the expected values from our seed data
 	require.Equal(t, 1.5, result.Readings[0].Level)
 	require.Equal(t, 2.0, result.Readings[1].Level)
 }
