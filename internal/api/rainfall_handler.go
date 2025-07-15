@@ -24,6 +24,17 @@ func NewRainfallHandler(service *service.RainfallService, logger *slog.Logger) *
 	}
 }
 
+func (h *RainfallHandler) returnBadRequest(w http.ResponseWriter, msg string) {
+	h.logger.Warn("Invalid parameter", "error", msg)
+	http.Error(w, msg, http.StatusBadRequest)
+}
+
+func (h *RainfallHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
+}
+
 func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "station")
 
@@ -37,8 +48,8 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 		var err error
 		page, err = strconv.Atoi(pageParam)
 		if err != nil || page <= 0 {
-			slog.Warn("Invalid page parameter", "error", err)
-			http.Error(w, "Page must be a positive integer", http.StatusBadRequest)
+			h.logger.Warn("Invalid page parameter", "error", err)
+			h.returnBadRequest(w, "Page must be a positive integer")
 			return
 		}
 	}
@@ -51,8 +62,8 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
 		if err != nil || pageSize <= 0 {
-			slog.Warn("Invalid pageSize parameter", "error", err)
-			http.Error(w, "Page size must be a positive integer", http.StatusBadRequest)
+			h.logger.Warn("Invalid pageSize parameter", "error", err)
+			h.returnBadRequest(w, "Page size must be a positive integer")
 			return
 		}
 	}
@@ -66,23 +77,21 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 		// 2006-01-02 is the reference time format in Go
 		startDate, err = time.Parse("2006-01-02", startDateParam)
 		if err != nil {
-			slog.Warn("Invalid startDate parameter", "error", err)
-			http.Error(w, "Start date must be in format YYYY-MM-DD", http.StatusBadRequest)
+			h.logger.Warn("Invalid startDate parameter", "error", err)
+			h.returnBadRequest(w, "Start date must be in format YYYY-MM-DD")
 			return
 		}
 	}
 
 	readings, err := h.service.ListByStation(r.Context(), name, page, pageSize, startDate)
 	if err != nil {
-		slog.Error("Error fetching readings", "error", err)
+		h.logger.Error("Error fetching readings", "error", err)
 		http.Error(w, "Internal server error when getting readings", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	response := map[string]interface{}{
 		"readings": readings,
 	}
-	json.NewEncoder(w).Encode(response)
+	h.writeResponseToJson(w, http.StatusOK, response)
 }

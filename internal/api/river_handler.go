@@ -23,6 +23,17 @@ func NewRiverHandler(svc *service.RiverService, logger *slog.Logger) *RiverHandl
 	}
 }
 
+func (h *RiverHandler) returnBadRequest(w http.ResponseWriter, msg string) {
+	h.logger.Warn("Invalid parameter", "error", msg)
+	http.Error(w, msg, http.StatusBadRequest)
+}
+
+func (h *RiverHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
+}
+
 func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
@@ -34,8 +45,8 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 		var err error
 		page, err = strconv.Atoi(pageParam)
 		if err != nil || page <= 0 {
-			slog.Warn("Invalid page parameter", "error", err)
-			http.Error(w, "Page must be a positive integer", http.StatusBadRequest)
+			h.logger.Warn("Invalid page parameter", "error", err)
+			h.returnBadRequest(w, "Page must be a positive integer")
 			return
 		}
 	}
@@ -48,8 +59,8 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 		var err error
 		pageSize, err = strconv.Atoi(pageSizeParam)
 		if err != nil || pageSize <= 0 {
-			slog.Warn("Invalid pageSize parameter", "error", err)
-			http.Error(w, "Page size must be a positive integer", http.StatusBadRequest)
+			h.logger.Warn("Invalid pageSize parameter", "error", err)
+			h.returnBadRequest(w, "Page size must be a positive integer")
 			return
 		}
 	}
@@ -63,8 +74,8 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 		// 2006-01-02 is the reference time format in Go
 		startDate, err = time.Parse("2006-01-02", startDateParam)
 		if err != nil {
-			slog.Warn("Invalid startDate parameter", "error", err)
-			http.Error(w, "Start date must be in format YYYY-MM-DD", http.StatusBadRequest)
+			h.logger.Warn("Invalid startDate parameter", "error", err)
+			h.returnBadRequest(w, "Start date must be in format YYYY-MM-DD")
 			return
 		}
 	}
@@ -76,10 +87,8 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	response := map[string]interface{}{
 		"readings": readings,
 	}
-	json.NewEncoder(w).Encode(response)
+	h.writeResponseToJson(w, http.StatusOK, response)
 }
