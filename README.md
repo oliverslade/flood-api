@@ -101,7 +101,7 @@ This is a Go application. To build and run:
 1. Ensure you have Go installed.
 2. Run `go mod tidy` to install dependencies.
 3. Apply database migrations if necessary (migrations are in the `migrations/` directory).
-4. Start the server: `go run cmd/flood-api/main.go`  
+4. Start the server: `make run`  
    The API will be available at `http://localhost:9001` (configurable).
 
 Note: The project uses PostgreSQL in the current implementation (see `internal/repository/postgres/`).

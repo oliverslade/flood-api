@@ -23,17 +23,6 @@ func NewRiverHandler(svc *service.RiverService, logger *slog.Logger) *RiverHandl
 	}
 }
 
-func (h *RiverHandler) returnBadRequest(w http.ResponseWriter, msg string) {
-	h.logger.Warn("Invalid parameter", "error", msg)
-	http.Error(w, msg, http.StatusBadRequest)
-}
-
-func (h *RiverHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(v)
-}
-
 func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
@@ -91,4 +80,15 @@ func (h *RiverHandler) GetReadings(w http.ResponseWriter, r *http.Request) {
 		"readings": readings,
 	}
 	h.writeResponseToJson(w, http.StatusOK, response)
+}
+
+func (h *RiverHandler) returnBadRequest(w http.ResponseWriter, msg string) {
+	h.logger.Warn("Invalid parameter", "error", msg)
+	http.Error(w, msg, http.StatusBadRequest)
+}
+
+func (h *RiverHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
 }

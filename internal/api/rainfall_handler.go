@@ -24,17 +24,6 @@ func NewRainfallHandler(service *service.RainfallService, logger *slog.Logger) *
 	}
 }
 
-func (h *RainfallHandler) returnBadRequest(w http.ResponseWriter, msg string) {
-	h.logger.Warn("Invalid parameter", "error", msg)
-	http.Error(w, msg, http.StatusBadRequest)
-}
-
-func (h *RainfallHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(v)
-}
-
 func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "station")
 
@@ -94,4 +83,15 @@ func (h *RainfallHandler) GetReadingsByStation(w http.ResponseWriter, r *http.Re
 		"readings": readings,
 	}
 	h.writeResponseToJson(w, http.StatusOK, response)
+}
+
+func (h *RainfallHandler) returnBadRequest(w http.ResponseWriter, msg string) {
+	h.logger.Warn("Invalid parameter", "error", msg)
+	http.Error(w, msg, http.StatusBadRequest)
+}
+
+func (h *RainfallHandler) writeResponseToJson(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
 }

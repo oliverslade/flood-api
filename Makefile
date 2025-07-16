@@ -26,6 +26,7 @@ help:
 	@echo "  sqlc-generate             # Generate Go code from SQL queries"
 	@echo "  build                     # Build the application"
 	@echo "  build-release             # Build optimized release binary"
+	@echo "  run                       # Build and run the application locally"
 	@echo "  test                      # Run unit tests"
 	@echo "  test-verbose              # Run unit tests with verbose output"
 	@echo "  test-coverage             # Run unit tests with coverage report"
@@ -103,6 +104,11 @@ build-release:
 	@echo "Building optimized release binary..."
 	@CGO_ENABLED=0 go build -ldflags="-w -s" -o bin/flood-api ./cmd/flood-api
 	@echo "Release build completed - binary: bin/flood-api"
+
+.PHONY: run
+run: build
+	@echo "Starting flood-api on port 9001..."
+	@DATABASE_URL="postgres://localhost/flood?sslmode=disable" ./bin/flood-api -port 9001
 
 .PHONY: clean
 clean:
