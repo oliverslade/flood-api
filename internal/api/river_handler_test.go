@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oliverslade/flood-api/internal/domain"
@@ -26,14 +25,6 @@ func (m *mockErrorRepo) GetReadings(ctx context.Context, params domain.GetReadin
 }
 
 func TestRiverHandler_GetReadings(t *testing.T) {
-	// Expected readings for river (matches in-memory test data)
-	expectedAllReadings := []domain.RiverReading{
-		{Timestamp: time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC), Level: 1.2},
-		{Timestamp: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC), Level: 1.3},
-		{Timestamp: time.Date(2024, 1, 1, 11, 0, 0, 0, time.UTC), Level: 1.4},
-		{Timestamp: time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC), Level: 1.5},
-		{Timestamp: time.Date(2024, 1, 2, 9, 0, 0, 0, time.UTC), Level: 1.1},
-	}
 
 	t.Run("returns readings successfully with default parameters", func(t *testing.T) {
 		repo := inmemory.NewRiverRepo()
@@ -53,12 +44,26 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
-		var response map[string][]domain.RiverReading
+		var response struct {
+			Readings []struct {
+				Timestamp string  `json:"timestamp"`
+				Level     float64 `json:"level"`
+			} `json:"readings"`
+		}
 		err = json.Unmarshal(rr.Body.Bytes(), &response)
 		require.NoError(t, err)
 
-		readings := response["readings"]
-		assert.Equal(t, expectedAllReadings, readings)
+		require.Len(t, response.Readings, 5)
+		assert.Equal(t, "2024-01-01T09:00:00", response.Readings[0].Timestamp)
+		assert.Equal(t, 1.2, response.Readings[0].Level)
+		assert.Equal(t, "2024-01-01T10:00:00", response.Readings[1].Timestamp)
+		assert.Equal(t, 1.3, response.Readings[1].Level)
+		assert.Equal(t, "2024-01-01T11:00:00", response.Readings[2].Timestamp)
+		assert.Equal(t, 1.4, response.Readings[2].Level)
+		assert.Equal(t, "2024-01-01T12:00:00", response.Readings[3].Timestamp)
+		assert.Equal(t, 1.5, response.Readings[3].Level)
+		assert.Equal(t, "2024-01-02T09:00:00", response.Readings[4].Timestamp)
+		assert.Equal(t, 1.1, response.Readings[4].Level)
 	})
 
 	t.Run("returns readings successfully with both pagination parameters", func(t *testing.T) {
@@ -79,12 +84,18 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
-		var response map[string][]domain.RiverReading
+		var response struct {
+			Readings []struct {
+				Timestamp string  `json:"timestamp"`
+				Level     float64 `json:"level"`
+			} `json:"readings"`
+		}
 		err = json.Unmarshal(rr.Body.Bytes(), &response)
 		require.NoError(t, err)
 
-		readings := response["readings"]
-		assert.Equal(t, expectedAllReadings, readings)
+		require.Len(t, response.Readings, 5)
+		assert.Equal(t, "2024-01-01T09:00:00", response.Readings[0].Timestamp)
+		assert.Equal(t, 1.2, response.Readings[0].Level)
 	})
 
 	t.Run("returns readings successfully with start date filter", func(t *testing.T) {
@@ -105,12 +116,18 @@ func TestRiverHandler_GetReadings(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
-		var response map[string][]domain.RiverReading
+		var response struct {
+			Readings []struct {
+				Timestamp string  `json:"timestamp"`
+				Level     float64 `json:"level"`
+			} `json:"readings"`
+		}
 		err = json.Unmarshal(rr.Body.Bytes(), &response)
 		require.NoError(t, err)
 
-		readings := response["readings"]
-		assert.Equal(t, expectedAllReadings[4:], readings) // Only the last reading
+		require.Len(t, response.Readings, 1) // Only the last reading from 2024-01-02
+		assert.Equal(t, "2024-01-02T09:00:00", response.Readings[0].Timestamp)
+		assert.Equal(t, 1.1, response.Readings[0].Level)
 	})
 
 	t.Run("returns bad request when start date parameter is invalid", func(t *testing.T) {

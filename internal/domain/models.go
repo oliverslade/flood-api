@@ -4,105 +4,53 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
+	"math"
 	"time"
 )
 
-var (
-	ErrNotFound = errors.New("not found")
-)
+var ErrNotFound = errors.New("not found")
+
+const tsLayout = "2006-01-02T15:04:05" // spec‑defined timestamp layout
+
+func formatTS(t time.Time) string         { return t.Format(tsLayout) }
+func parseTS(s string) (time.Time, error) { return time.Parse(tsLayout, s) }
+
+func roundToDecimalPlaces(v float64, dp int) float64 {
+	m := math.Pow10(dp)
+	return math.Round(v*m) / m
+}
 
 type RiverReading struct {
-	Timestamp time.Time
-	Level     float64 // Level in metres
+	Timestamp time.Time `json:"timestamp"`
+	Level     float64   `json:"level"`
 }
 
 func (r RiverReading) MarshalJSON() ([]byte, error) {
-	type Alias RiverReading
-	return json.Marshal(&struct {
-		Level string `json:"Level"`
-		*Alias
+	return json.Marshal(struct {
+		Timestamp string  `json:"timestamp"`
+		Level     float64 `json:"level"`
 	}{
-		// Format Level to 3 decimals
-		Level: fmt.Sprintf("%.3f", r.Level),
-		Alias: (*Alias)(&r),
+		Timestamp: formatTS(r.Timestamp),
+		Level:     roundToDecimalPlaces(r.Level, 3),
 	})
-}
-
-func (r *RiverReading) UnmarshalJSON(data []byte) error {
-	type Alias RiverReading
-	aux := &struct {
-		Level interface{} `json:"Level"`
-		*Alias
-	}{
-		Alias: (*Alias)(r),
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-
-	switch v := aux.Level.(type) {
-	case string:
-		level, err := strconv.ParseFloat(v, 64)
-		if err != nil {
-			return err
-		}
-		r.Level = level
-	case float64:
-		r.Level = v
-	default:
-		return fmt.Errorf("invalid type for Level field")
-	}
-
-	return nil
 }
 
 type RainfallReading struct {
-	Timestamp   time.Time
-	Level       float64 // Level in metres
-	StationName string
+	Timestamp   time.Time `json:"timestamp"`
+	Level       float64   `json:"level"`
+	StationName string    `json:"station"`
 }
 
 func (r RainfallReading) MarshalJSON() ([]byte, error) {
-	type Alias RainfallReading
-	return json.Marshal(&struct {
-		Level string `json:"Level"`
-		*Alias
+	return json.Marshal(struct {
+		Timestamp string  `json:"timestamp"`
+		Level     float64 `json:"level"`
+		Station   string  `json:"station"`
 	}{
-		// Format Level to 3 decimals
-		Level: fmt.Sprintf("%.3f", r.Level),
-		Alias: (*Alias)(&r),
+		Timestamp: formatTS(r.Timestamp),
+		Level:     roundToDecimalPlaces(r.Level, 3),
+		Station:   r.StationName,
 	})
-}
-
-func (r *RainfallReading) UnmarshalJSON(data []byte) error {
-	type Alias RainfallReading
-	aux := &struct {
-		Level interface{} `json:"Level"`
-		*Alias
-	}{
-		Alias: (*Alias)(r),
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-
-	switch v := aux.Level.(type) {
-	case string:
-		level, err := strconv.ParseFloat(v, 64)
-		if err != nil {
-			return err
-		}
-		r.Level = level
-	case float64:
-		r.Level = v
-	default:
-		return fmt.Errorf("invalid type for Level field")
-	}
-
-	return nil
 }
 
 type Station struct {
@@ -123,4 +71,17 @@ type GetReadingsParams struct {
 type GetRainfallParams struct {
 	StationName string
 	GetReadingsParams
+}
+
+var (
+	_ json.Marshaler = (*RiverReading)(nil)
+	_ json.Marshaler = (*RainfallReading)(nil)
+)
+
+func ParseTimestamp(s string) (time.Time, error) {
+	t, err := parseTS(s)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("timestamp: %w", err)
+	}
+	return t, nil
 }
