@@ -14,7 +14,6 @@ import (
 
 	"github.com/oliverslade/flood-api/internal/api"
 	"github.com/oliverslade/flood-api/internal/repository/postgres"
-	"github.com/oliverslade/flood-api/internal/service"
 )
 
 func main() {
@@ -35,27 +34,37 @@ func main() {
 	}
 	defer db.Close()
 
-	db.SetMaxOpenConns(10)
-	db.SetConnMaxIdleTime(30 * time.Minute)
+	// Connection pooling
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Minute) 
+	db.SetConnMaxIdleTime(30 * time.Second)
+
 	if err := db.Ping(); err != nil {
 		slog.Error("db ping", "err", err)
 		os.Exit(1)
 	}
 
 	riverRepo := postgres.NewRiverRepo(db)
-	riverService := service.NewRiverService(riverRepo)
-	riverHandler := api.NewRiverHandler(riverService, slog.Default())
+	riverHandler := api.NewRiverHandler(riverRepo, slog.Default())
 
 	rainfallRepo := postgres.NewRainfallRepo(db)
-	rainfallService := service.NewRainfallService(rainfallRepo)
-	rainfallHandler := api.NewRainfallHandler(rainfallService, slog.Default())
+	rainfallHandler := api.NewRainfallHandler(rainfallRepo, slog.Default())
 
 	router := chi.NewRouter()
+	router.Use(api.TimeoutMiddleware) // Add 5s timeout to all requests
 	router.Get("/river", riverHandler.GetReadings)
 	router.Get("/rainfall/{station}", rainfallHandler.GetReadingsByStation)
 
 	slog.Info("Listening", "addr", addr)
-	server := &http.Server{Addr: addr, Handler: router}
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		slog.Error("listen", "err", err)
 	}

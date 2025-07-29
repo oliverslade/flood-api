@@ -33,6 +33,7 @@ help:
 	@echo "  test-integration          # Run integration tests (requires Docker)"
 	@echo "  test-integration-verbose  # Run integration tests with verbose output"
 	@echo "  test-all                  # Run both unit and integration tests"
+	@echo "  benchmark     			   # Run performance tests"
 	@echo "  clean                     # Clean build artifacts"
 	@echo "  fmt                       # Format Go code using go fmt"
 	@echo "  vet                       # Run go vet for static analysis"
@@ -175,6 +176,21 @@ test-all:
 	@$(MAKE) test
 	@$(MAKE) test-integration
 	@echo "All tests (unit + integration) passed"
+
+.PHONY: benchmark
+benchmark:
+	@echo "Running integration-level performance tests (real DB)..."
+	@echo "Checking Docker availability..."
+	@if ! docker version > /dev/null 2>&1; then \
+		echo "Docker is not running or not available"; \
+		echo "Please start Docker/Colima and try again"; \
+		echo "For Colima users: colima start"; \
+		exit 1; \
+	fi
+	@echo "Docker is available"
+	@echo "Running integration performance tests with testcontainers..."
+	@TESTCONTAINERS_RYUK_DISABLED=true DOCKER_HOST=$(DOCKER_HOST_VAR) go test -tags=integration -bench=. ./test/integration/
+	@echo "Integration performance tests completed"
 
 # Go formatting and code quality
 .PHONY: fmt
