@@ -3,21 +3,15 @@ package domain
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"time"
 )
 
 var ErrNotFound = errors.New("not found")
 
-const tsLayout = "2006-01-02T15:04:05" // spec‑defined timestamp layout
-
-func formatTS(t time.Time) string         { return t.Format(tsLayout) }
-func parseTS(s string) (time.Time, error) { return time.Parse(tsLayout, s) }
-
-func roundToDecimalPlaces(v float64, dp int) float64 {
-	m := math.Pow10(dp)
-	return math.Round(v*m) / m
+// roundLevel rounds to 3 decimal places as per API spec
+func roundLevel(v float64) float64 {
+	return math.Round(v*1000) / 1000
 }
 
 type RiverReading struct {
@@ -27,11 +21,11 @@ type RiverReading struct {
 
 func (r RiverReading) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Timestamp string  `json:"timestamp"`
-		Level     float64 `json:"level"`
+		Timestamp time.Time `json:"timestamp"`
+		Level     float64   `json:"level"`
 	}{
-		Timestamp: formatTS(r.Timestamp),
-		Level:     roundToDecimalPlaces(r.Level, 3),
+		Timestamp: r.Timestamp,
+		Level:     roundLevel(r.Level),
 	})
 }
 
@@ -43,12 +37,12 @@ type RainfallReading struct {
 
 func (r RainfallReading) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Timestamp string  `json:"timestamp"`
-		Level     float64 `json:"level"`
-		Station   string  `json:"station"`
+		Timestamp time.Time `json:"timestamp"`
+		Level     float64   `json:"level"`
+		Station   string    `json:"station"`
 	}{
-		Timestamp: formatTS(r.Timestamp),
-		Level:     roundToDecimalPlaces(r.Level, 3),
+		Timestamp: r.Timestamp,
+		Level:     roundLevel(r.Level),
 		Station:   r.StationName,
 	})
 }
@@ -71,17 +65,4 @@ type GetReadingsParams struct {
 type GetRainfallParams struct {
 	StationName string
 	GetReadingsParams
-}
-
-var (
-	_ json.Marshaler = (*RiverReading)(nil)
-	_ json.Marshaler = (*RainfallReading)(nil)
-)
-
-func ParseTimestamp(s string) (time.Time, error) {
-	t, err := parseTS(s)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("timestamp: %w", err)
-	}
-	return t, nil
 }

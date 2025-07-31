@@ -1,9 +1,10 @@
+//go:generate sqlc generate
+
 package postgres
 
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/oliverslade/flood-api/internal/domain"
 	"github.com/oliverslade/flood-api/internal/repository"
@@ -44,7 +45,11 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 
 		readings := make([]domain.RainfallReading, len(dbReadings))
 		for i, dbReading := range dbReadings {
-			readings[i] = r.toDomainRainfallReading(dbReading.Timestamp, dbReading.Level, params.StationName)
+			readings[i] = domain.RainfallReading{
+				Timestamp:   dbReading.Timestamp,
+				Level:       dbReading.Level,
+				StationName: params.StationName,
+			}
 		}
 		return readings, nil
 	}
@@ -61,7 +66,11 @@ func (r *RainfallRepo) GetReadingsByStation(ctx context.Context, params domain.G
 
 	readings := make([]domain.RainfallReading, len(dbReadings))
 	for i, dbReading := range dbReadings {
-		readings[i] = r.toDomainRainfallReading(dbReading.Timestamp, dbReading.Level, params.StationName)
+		readings[i] = domain.RainfallReading{
+			Timestamp:   dbReading.Timestamp,
+			Level:       dbReading.Level,
+			StationName: params.StationName,
+		}
 	}
 	return readings, nil
 }
@@ -80,13 +89,4 @@ func (r *RainfallRepo) getStationByName(ctx context.Context, stationName string)
 		ID:   dbStation.ID,
 		Name: dbStation.Name,
 	}, nil
-}
-
-// converts a database row to domain rainfall reading
-func (r *RainfallRepo) toDomainRainfallReading(timestamp time.Time, level float64, stationName string) domain.RainfallReading {
-	return domain.RainfallReading{
-		Timestamp:   timestamp,
-		Level:       level,
-		StationName: stationName,
-	}
 }
